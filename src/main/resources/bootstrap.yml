@@ -1,0 +1,17 @@
+spring:
+  profiles:
+    active: local
+  main:
+    allow-circular-references: true
+  application:
+    name: msp-requirement
+  cloud:
+    nacos:
+      server-addr: ${NACOS_ADDR:127.0.0.1:8848}
+      config:
+        enabled: true
+        group: DEFAULT_GROUP
+        file-extension: yaml
+        refresh-enabled: true
+      discovery:
+        enabled: false

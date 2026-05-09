@@ -1,0 +1,44 @@
+services:
+  nacos:
+    platform: linux/amd64
+    image: nacos/nacos-server:v2.3.2
+    container_name: nacos
+    environment:
+      - MODE=standalone
+      - PREFER_HOST_MODE=hostname
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+    volumes:
+      - nacos_data:/home/nacos/data
+
+  postgresql:
+    image: postgres:15
+    platform: linux/amd64
+    container_name: postgresql
+    environment:
+      POSTGRES_USER: msp
+      POSTGRES_PASSWORD: msp123
+      POSTGRES_DB: msp_requirement
+      TZ: Asia/Shanghai
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d
+
+  requirement:
+    build: .
+    container_name: requirement
+    ports:
+      - "8080:8080"
+    environment:
+      - NACOS_ADDR=nacos:8848
+      - NACOS_NAMESPACE=
+    depends_on:
+      - nacos
+      - postgresql
+
+volumes:
+  nacos_data:
+  pg_data:
