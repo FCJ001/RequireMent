@@ -1,0 +1,2 @@
+ALTER TABLE sys_user ADD COLUMN dept VARCHAR(100);
+COMMENT ON COLUMN sys_user.dept IS '部门';
