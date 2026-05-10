@@ -9,7 +9,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = "com.byd.xjsy.common.feign")
-@MapperScan("com.byd.msp.requirement.mapper")
+@MapperScan("com.byd.msp.requirement.**.mapper")
 public class RequireMentApplication {
     public static void main(String[] args) {
         SpringApplication.run(RequireMentApplication.class, args);
