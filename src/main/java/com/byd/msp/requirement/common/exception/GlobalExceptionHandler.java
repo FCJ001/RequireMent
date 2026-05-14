@@ -12,6 +12,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
@@ -35,6 +37,18 @@ public class GlobalExceptionHandler {
         log.error("BaseException, ex:{}", be.getMessage(), be);
         return GlobalResultTypeEnum.ERROR.getCode().equals(be.getResultType().getCode()) ? Result.fail() : Result.fail(be.getResultType(),
                 I18nMessageCommonUtil.getLocale(be.getResultType().getMsg()));
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public Result<?> handleMissingServletRequestPartException(MissingServletRequestPartException e) {
+        log.warn("缺少上传文件: {}", e.getRequestPartName());
+        return Result.fail("请选择要上传的文件");
+    }
+
+    @ExceptionHandler(MultipartException.class)
+    public Result<?> handleMultipartException(MultipartException e) {
+        log.warn("文件上传异常: {}", e.getMessage());
+        return Result.fail("请使用 multipart/form-data 格式上传文件");
     }
 
     @ExceptionHandler(RuntimeException.class)

@@ -2,3 +2,9 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+
+minio:
+  endpoint: http://127.0.0.1:9000
+  access-key: admin
+  secret-key: admin123456
+  bucket-name: requirement

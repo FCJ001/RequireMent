@@ -15,3 +15,4 @@ public class RequireMentApplication {
         SpringApplication.run(RequireMentApplication.class, args);
     }
 }
+

@@ -12,6 +12,19 @@ services:
     volumes:
       - nacos_data:/home/nacos/data
 
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: admin123456
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
   postgresql:
     image: postgres:15
     platform: linux/amd64
@@ -41,4 +54,5 @@ services:
 
 volumes:
   nacos_data:
+  minio_data:
   pg_data:
