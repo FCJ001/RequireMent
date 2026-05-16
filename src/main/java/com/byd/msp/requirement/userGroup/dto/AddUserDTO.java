@@ -16,4 +16,16 @@ public class AddUserDTO {
 
     @ApiModelProperty("手机号")
     private String phone;
+
+    @ApiModelProperty("姓名")
+    private String realName;
+
+    @ApiModelProperty("部门")
+    private String department;
+
+    @ApiModelProperty("角色ID")
+    private String roleId;
+
+    @ApiModelProperty("是否启用")
+    private Boolean isEnabled;
 }

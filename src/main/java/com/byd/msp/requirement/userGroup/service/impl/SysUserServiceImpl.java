@@ -25,11 +25,11 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     public PageResult<UserVO> query(UserQueryDTO dto) {
         // 1. 构建查询条件
         LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<SysUser>()
-                // 如果传了username，模糊查询：WHERE username LIKE '%值%'
                 .like(StringUtils.isNotBlank(dto.getUsername()), SysUser::getUsername, dto.getUsername())
-                // 如果传了status，精确匹配：AND status = '值'
                 .eq(StringUtils.isNotBlank(dto.getStatus()), SysUser::getStatus, dto.getStatus())
-                // 按创建时间倒序：ORDER BY created_time DESC
+                .like(StringUtils.isNotBlank(dto.getRealName()), SysUser::getRealName, dto.getRealName())
+                .like(StringUtils.isNotBlank(dto.getDepartment()), SysUser::getDepartment, dto.getDepartment())
+                .eq(dto.getIsEnabled() != null, SysUser::getIsEnabled, dto.getIsEnabled())
                 .orderByDesc(SysUser::getCreatedTime);
 
         // 2. 执行分页查询：SELECT * FROM sys_user WHERE ... LIMIT ? OFFSET ?

@@ -26,6 +26,18 @@ public class UserVO {
     @ApiModelProperty("状态")
     private String status;
 
+    @ApiModelProperty("姓名")
+    private String realName;
+
+    @ApiModelProperty("部门")
+    private String department;
+
+    @ApiModelProperty("角色ID")
+    private String roleId;
+
+    @ApiModelProperty("是否启用")
+    private Boolean isEnabled;
+
     @ApiModelProperty("创建时间")
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy/MM/dd HH:mm:ss")
     private LocalDateTime createdTime;

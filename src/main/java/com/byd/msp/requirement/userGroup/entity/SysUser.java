@@ -30,4 +30,16 @@ public class SysUser extends BaseEntity {
 
     @ApiModelProperty("状态: ACTIVE-启用, INACTIVE-禁用")
     private String status;
+
+    @ApiModelProperty("姓名")
+    private String realName;
+
+    @ApiModelProperty("部门")
+    private String department;
+
+    @ApiModelProperty("角色ID")
+    private String roleId;
+
+    @ApiModelProperty("是否启用")
+    private Boolean isEnabled;
 }

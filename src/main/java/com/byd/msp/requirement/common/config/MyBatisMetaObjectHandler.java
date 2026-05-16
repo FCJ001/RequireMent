@@ -31,11 +31,17 @@ public class MyBatisMetaObjectHandler implements MetaObjectHandler {
     }
 
     private String getCurrentUserId() {
+        // 优先从 UserContextHolder 获取
+        String userId = com.byd.msp.requirement.common.context.UserContextHolder.getInstance().getUsername();
+        if (userId != null) {
+            return userId;
+        }
+        // 回退到 HTTP 请求头
         try {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             if (attributes != null) {
                 HttpServletRequest request = attributes.getRequest();
-                String userId = request.getHeader("userId");
+                userId = request.getHeader("userId");
                 if (userId != null) {
                     return userId;
                 }
