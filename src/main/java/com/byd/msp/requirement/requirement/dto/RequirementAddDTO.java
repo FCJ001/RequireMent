@@ -33,6 +33,9 @@ public class RequirementAddDTO {
     @ApiModelProperty("处理人ID")
     private String handlerId;
 
+    @ApiModelProperty("创建动作: CRequirementAdd:STAGE(暂存/草稿) / CRequirementAdd:SUBMIT(提交/需求评估)，仅 FL25103101 流程使用")
+    private String action;
+
     @ApiModelProperty("流程实例ID")
     private String flowInstanceId;
 

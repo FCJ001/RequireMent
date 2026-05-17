@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" targetNamespace="http://www.flowable.org/processdef">
+  <process id="FL25103101" name="需求流程" isExecutable="true">
+    <!-- ==================== 节点定义 ==================== -->
+    <startEvent id="startEvent" name="开始"/>
+    <receiveTask id="node_0" name="新增"/>
+    <receiveTask id="node_1" name="草稿"/>
+    <receiveTask id="node_45" name="需求评估"/>
+    <receiveTask id="node_34" name="CR拆解"/>
+    <receiveTask id="node_51" name="需求验收"/>
+    <receiveTask id="node_13" name="已完成"/>
+    <receiveTask id="node_9" name="已关闭"/>
+    <!-- ==================== 网关 ==================== -->
+    <exclusiveGateway id="Gateway_1dzojg2" name="新增判断"/>
+    <exclusiveGateway id="Gateway_0do93t4" name="需求评估判断"/>
+    <exclusiveGateway id="sid-22dbc059" name="CR拆解判断"/>
+    <exclusiveGateway id="Gateway_draft" name="草稿判断"/>
+    <exclusiveGateway id="Gateway_acceptance" name="需求验收判断"/>
+    <endEvent id="endEvent" name="结束"/>
+    <!-- ==================== 连线 ==================== -->
+    <sequenceFlow id="Flow_1nuazdt" sourceRef="startEvent" targetRef="node_0"/>
+    <sequenceFlow id="Flow_020wh17" sourceRef="node_0" targetRef="Gateway_1dzojg2"/>
+    <sequenceFlow id="Flow_1vrqhgr" name="新增-暂存" sourceRef="Gateway_1dzojg2" targetRef="node_1">
+      <conditionExpression xsi:type="tFormalExpression">${event == 'CRequirementAdd:STAGE'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="Flow_1r2gs58" name="新增-提交" sourceRef="Gateway_1dzojg2" targetRef="node_45">
+      <conditionExpression xsi:type="tFormalExpression">${event == 'CRequirementAdd:SUBMIT'}</conditionExpression>
+    </sequenceFlow>
+
+    <sequenceFlow id="Flow_1wboxd5" sourceRef="node_1" targetRef="Gateway_draft"/>
+    <sequenceFlow id="Flow_draft_submit" name="编辑-提交" sourceRef="Gateway_draft" targetRef="node_45">
+      <conditionExpression xsi:type="tFormalExpression">${event == 'CRequirementEdit:SUBMIT'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="Flow_gw_draft_default" sourceRef="Gateway_draft" targetRef="node_1"/>
+    <sequenceFlow id="Flow_15gaozp" sourceRef="node_45" targetRef="Gateway_0do93t4"/>
+    <sequenceFlow id="Flow_132aekp" name="需求评估-提交" sourceRef="Gateway_0do93t4" targetRef="node_34">
+      <conditionExpression xsi:type="tFormalExpression">${event == 'CIRCAssessment:SUBMIT'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="Flow_0nk6n6q" name="需求评估-驳回" sourceRef="Gateway_0do93t4" targetRef="node_1">
+      <conditionExpression xsi:type="tFormalExpression">${event == 'CIRCAssessment:REJECT'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="sid-2b4cac91" name="需求评估-转交" sourceRef="Gateway_0do93t4" targetRef="node_45">
+      <conditionExpression xsi:type="tFormalExpression">${event == 'CIRCAssessment:TRANSMIT'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="sid-444f7022" name="需求评估-不涉及" sourceRef="Gateway_0do93t4" targetRef="node_9">
+      <conditionExpression xsi:type="tFormalExpression">${event == 'CIRCAssessment:NOTINVOLVED'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="Flow_gw2_default" sourceRef="Gateway_0do93t4" targetRef="node_45"/>
+    <sequenceFlow id="sid-7fe9519e" sourceRef="node_34" targetRef="sid-22dbc059"/>
+    <sequenceFlow id="sid-f5e8ca64" name="CR拆解-提交" sourceRef="sid-22dbc059" targetRef="node_51">
+      <conditionExpression xsi:type="tFormalExpression">${event == 'CIRCcr:SUBMIT'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="sid-4446f8c0" name="CR拆解-驳回" sourceRef="sid-22dbc059" targetRef="node_45">
+      <conditionExpression xsi:type="tFormalExpression">${event == 'CIRCcr:REJECT'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="sid-f37377a6" name="CR拆解-无需JIRA" sourceRef="sid-22dbc059" targetRef="node_13">
+      <conditionExpression xsi:type="tFormalExpression">${event == 'CIRCcr:NO-JIRA-SUBMIT'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="Flow_gw3_default" sourceRef="sid-22dbc059" targetRef="node_45"/>
+    <sequenceFlow id="sid-f95fdf62" sourceRef="node_51" targetRef="Gateway_acceptance"/>
+    <sequenceFlow id="Flow_acceptance_accept" name="需求验收-提交" sourceRef="Gateway_acceptance" targetRef="node_13">
+      <conditionExpression xsi:type="tFormalExpression">${event == 'CIRCAcceptance:ACCEPT'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="Flow_gw_acceptance_default" sourceRef="Gateway_acceptance" targetRef="node_51"/>
+    <sequenceFlow id="sid-7a10a013" sourceRef="node_9" targetRef="endEvent"/>
+    <sequenceFlow id="sid-8ac38421-46f2-4f57-a342-67df9f812bfe" sourceRef="node_13" targetRef="endEvent"/>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_FL25103101">
+    <bpmndi:BPMNPlane id="BPMNPlane_FL25103101" bpmnElement="FL25103101">
+      <!-- ================================================================
+           列布局（间距 >= 60px，竖向线不拥挤）:
+             x= 70   左侧回退通道
+             x=180   主流程节点 (需求评估/CR拆解/需求验收)
+             x=310   主流程网关
+             x=430   顶部入口 (新增节点/网关) 中心
+             x=780   草稿节点
+             x=920   草稿网关
+             x=1080  右侧结束节点 (已完成/已关闭)
+             x=1230  endEvent
+             x=1270  已关闭→结束 垂直通道
+           横线层级（由高到低）:
+             y=475   顶部网关分叉 (新增→需求评估/草稿)
+             y=500   顶部网关默认→草稿
+             y=600   草稿→需求评估 (ABOVE all nodes)
+             y=790   节点→网关 L拐点
+             y=875   网关层水平线 (转交/不涉及)
+             y=930   需求评估→草稿驳回 (BELOW gateways)
+             y=975   网关→下节点 L拐点
+             y=1190  CR拆解节点→网关 L拐点
+             y=1275  CR网关层
+             y=1290  CR拆解→已完成
+             y=1375  CR网关→需求验收 L拐点
+             y=1590  需求验收节点→网关 L拐点
+             y=1675  验收网关层
+             y=1690  验收→已完成
+             y=1890  已完成→结束
+           ================================================================ -->
+      <!-- ===== 顶部入口 ===== -->
+      <bpmndi:BPMNShape id="shape_startEvent" bpmnElement="startEvent">
+        <omgdc:Bounds x="412" y="80" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape_node_0" bpmnElement="node_0">
+        <omgdc:Bounds x="380" y="250" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape_Gateway_1dzojg2" bpmnElement="Gateway_1dzojg2">
+        <omgdc:Bounds x="404.99997" y="450.0" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <!-- ===== 主流程 ===== -->
+      <bpmndi:BPMNShape id="shape_node_45" bpmnElement="node_45">
+        <omgdc:Bounds x="180" y="650" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape_Gateway_0do93t4" bpmnElement="Gateway_0do93t4">
+        <omgdc:Bounds x="310" y="850" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape_node_34" bpmnElement="node_34">
+        <omgdc:Bounds x="180" y="1050" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape_sid-22dbc059" bpmnElement="sid-22dbc059">
+        <omgdc:Bounds x="310" y="1250" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape_node_51" bpmnElement="node_51">
+        <omgdc:Bounds x="180" y="1450" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape_Gateway_acceptance" bpmnElement="Gateway_acceptance">
+        <omgdc:Bounds x="310" y="1650" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <!-- ===== 草稿分支 ===== -->
+      <bpmndi:BPMNShape id="shape_node_1" bpmnElement="node_1">
+        <omgdc:Bounds x="780" y="650" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape_Gateway_draft" bpmnElement="Gateway_draft">
+        <omgdc:Bounds x="920" y="850" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <!-- ===== 右侧结束节点 ===== -->
+      <bpmndi:BPMNShape id="shape_node_9" bpmnElement="node_9">
+        <omgdc:Bounds x="1080" y="1050" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape_node_13" bpmnElement="node_13">
+        <omgdc:Bounds x="1080" y="1850" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape_endEvent" bpmnElement="endEvent">
+        <omgdc:Bounds x="1252.0" y="1872.0" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <!-- ================================================================
+           连线（横平竖直，y 从高到低排列）
+           ================================================================ -->
+      <!-- 开始 → 新增 -->
+      <bpmndi:BPMNEdge id="edge_Flow_1nuazdt" bpmnElement="Flow_1nuazdt">
+        <omgdi:waypoint x="430" y="116"/>
+        <omgdi:waypoint x="430" y="250"/>
+      </bpmndi:BPMNEdge>
+      <!-- 新增 → 新增网关 -->
+      <bpmndi:BPMNEdge id="edge_Flow_020wh17" bpmnElement="Flow_020wh17">
+        <omgdi:waypoint x="430" y="330"/>
+        <omgdi:waypoint x="429.99997" y="450.0"/>
+      </bpmndi:BPMNEdge>
+      <!-- 新增网关 → 需求评估（SUBMIT） [横线 y=475] -->
+      <bpmndi:BPMNEdge id="edge_Flow_1r2gs58" bpmnElement="Flow_1r2gs58">
+        <omgdi:waypoint x="404.99997" y="475.0"/>
+        <omgdi:waypoint x="230" y="475"/>
+        <omgdi:waypoint x="230" y="650"/>
+      </bpmndi:BPMNEdge>
+      <!-- 新增网关 → 草稿（STAGE） [横线 y=475] -->
+      <bpmndi:BPMNEdge id="edge_Flow_1vrqhgr" bpmnElement="Flow_1vrqhgr">
+        <omgdi:waypoint x="454.99997" y="475.0"/>
+        <omgdi:waypoint x="830" y="475"/>
+        <omgdi:waypoint x="830" y="650"/>
+      </bpmndi:BPMNEdge>
+
+      <!-- 草稿网关 → 需求评估（编辑提交） [横线 y=600，ABOVE all nodes] -->
+      <bpmndi:BPMNEdge id="edge_Flow_draft_submit" bpmnElement="Flow_draft_submit">
+        <omgdi:waypoint x="945" y="850"/>
+        <omgdi:waypoint x="945" y="600"/>
+        <omgdi:waypoint x="230" y="600"/>
+        <omgdi:waypoint x="230" y="650"/>
+      </bpmndi:BPMNEdge>
+      <!-- 需求评估 → 需求评估网关 [L拐点 y=790] -->
+      <bpmndi:BPMNEdge id="edge_Flow_15gaozp" bpmnElement="Flow_15gaozp">
+        <omgdi:waypoint x="230" y="730"/>
+        <omgdi:waypoint x="230" y="790"/>
+        <omgdi:waypoint x="335" y="790"/>
+        <omgdi:waypoint x="335" y="850"/>
+      </bpmndi:BPMNEdge>
+      <!-- 草稿 → 草稿网关 [L拐点 y=790] -->
+      <bpmndi:BPMNEdge id="edge_Flow_1wboxd5" bpmnElement="Flow_1wboxd5">
+        <omgdi:waypoint x="830" y="730"/>
+        <omgdi:waypoint x="830" y="790"/>
+        <omgdi:waypoint x="945" y="790"/>
+        <omgdi:waypoint x="945" y="850"/>
+      </bpmndi:BPMNEdge>
+      <!-- 需求评估网关 → CR拆解（通过） [L拐点 y=975] -->
+      <bpmndi:BPMNEdge id="edge_Flow_132aekp" bpmnElement="Flow_132aekp">
+        <omgdi:waypoint x="335" y="900"/>
+        <omgdi:waypoint x="335" y="975"/>
+        <omgdi:waypoint x="230" y="975"/>
+        <omgdi:waypoint x="230" y="1050"/>
+      </bpmndi:BPMNEdge>
+      <!-- 需求评估网关 → 草稿（REJECT 驳回） [横线 y=930，BELOW gateways] -->
+      <bpmndi:BPMNEdge id="edge_Flow_0nk6n6q" bpmnElement="Flow_0nk6n6q">
+        <omgdi:waypoint x="335" y="900"/>
+        <omgdi:waypoint x="335" y="930"/>
+        <omgdi:waypoint x="830" y="930"/>
+        <omgdi:waypoint x="830" y="650"/>
+      </bpmndi:BPMNEdge>
+      <!-- 需求评估网关 → 需求评估（TRANSMIT 转交） [左侧通道 x=70] -->
+      <bpmndi:BPMNEdge id="edge_sid-2b4cac91" bpmnElement="sid-2b4cac91">
+        <omgdi:waypoint x="310" y="875"/>
+        <omgdi:waypoint x="70" y="875"/>
+        <omgdi:waypoint x="70" y="670"/>
+        <omgdi:waypoint x="180" y="670"/>
+      </bpmndi:BPMNEdge>
+      <!-- 需求评估网关 → 已关闭（NOTINVOLVED 不涉及） [横线 y=875] -->
+      <bpmndi:BPMNEdge id="edge_sid-444f7022" bpmnElement="sid-444f7022">
+        <omgdi:waypoint x="360" y="875"/>
+        <omgdi:waypoint x="1130" y="875"/>
+        <omgdi:waypoint x="1130" y="1050"/>
+      </bpmndi:BPMNEdge>
+      <!-- 需求评估网关 默认 → 需求评估 [左侧通道 x=70] -->
+      <bpmndi:BPMNEdge id="edge_Flow_gw2_default" bpmnElement="Flow_gw2_default">
+        <omgdi:waypoint x="335" y="900"/>
+        <omgdi:waypoint x="70" y="900"/>
+        <omgdi:waypoint x="70" y="690"/>
+        <omgdi:waypoint x="180" y="690"/>
+      </bpmndi:BPMNEdge>
+      <!-- 草稿网关 默认 → 草稿（右侧自循环） -->
+      <bpmndi:BPMNEdge id="edge_Flow_gw_draft_default" bpmnElement="Flow_gw_draft_default">
+        <omgdi:waypoint x="970" y="875"/>
+        <omgdi:waypoint x="1020" y="875"/>
+        <omgdi:waypoint x="1020" y="690"/>
+        <omgdi:waypoint x="880" y="690"/>
+      </bpmndi:BPMNEdge>
+      <!-- CR拆解 → CR拆解网关 [L拐点 y=1190] -->
+      <bpmndi:BPMNEdge id="edge_sid-7fe9519e" bpmnElement="sid-7fe9519e">
+        <omgdi:waypoint x="230" y="1130"/>
+        <omgdi:waypoint x="230" y="1190"/>
+        <omgdi:waypoint x="335" y="1190"/>
+        <omgdi:waypoint x="335" y="1250"/>
+      </bpmndi:BPMNEdge>
+      <!-- CR拆解网关 → 需求验收（通过） [L拐点 y=1375] -->
+      <bpmndi:BPMNEdge id="edge_sid-f5e8ca64" bpmnElement="sid-f5e8ca64">
+        <omgdi:waypoint x="335" y="1300"/>
+        <omgdi:waypoint x="335" y="1375"/>
+        <omgdi:waypoint x="230" y="1375"/>
+        <omgdi:waypoint x="230" y="1450"/>
+      </bpmndi:BPMNEdge>
+      <!-- CR拆解网关 → 需求评估（REJECT 驳回） [左侧通道 x=70] -->
+      <bpmndi:BPMNEdge id="edge_sid-4446f8c0" bpmnElement="sid-4446f8c0">
+        <omgdi:waypoint x="310" y="1275"/>
+        <omgdi:waypoint x="70" y="1275"/>
+        <omgdi:waypoint x="70" y="710"/>
+        <omgdi:waypoint x="180" y="710"/>
+      </bpmndi:BPMNEdge>
+      <!-- CR拆解网关 → 已完成（NO-JIRA-SUBMIT） [横线 y=1290] -->
+      <bpmndi:BPMNEdge id="edge_sid-f37377a6" bpmnElement="sid-f37377a6">
+        <omgdi:waypoint x="360" y="1275"/>
+        <omgdi:waypoint x="360" y="1290"/>
+        <omgdi:waypoint x="1130" y="1290"/>
+        <omgdi:waypoint x="1130" y="1850"/>
+      </bpmndi:BPMNEdge>
+      <!-- CR拆解网关 默认 → 需求评估 [左侧通道 x=70] -->
+      <bpmndi:BPMNEdge id="edge_Flow_gw3_default" bpmnElement="Flow_gw3_default">
+        <omgdi:waypoint x="335" y="1300"/>
+        <omgdi:waypoint x="70" y="1300"/>
+        <omgdi:waypoint x="70" y="730"/>
+        <omgdi:waypoint x="180" y="730"/>
+      </bpmndi:BPMNEdge>
+      <!-- 需求验收 → 需求验收网关 [L拐点 y=1590] -->
+      <bpmndi:BPMNEdge id="edge_sid-f95fdf62" bpmnElement="sid-f95fdf62">
+        <omgdi:waypoint x="230" y="1530"/>
+        <omgdi:waypoint x="230" y="1590"/>
+        <omgdi:waypoint x="335" y="1590"/>
+        <omgdi:waypoint x="335" y="1650"/>
+      </bpmndi:BPMNEdge>
+      <!-- 需求验收网关 → 已完成（ACCEPT） [横线 y=1690] -->
+      <bpmndi:BPMNEdge id="edge_Flow_acceptance_accept" bpmnElement="Flow_acceptance_accept">
+        <omgdi:waypoint x="360" y="1675"/>
+        <omgdi:waypoint x="360" y="1690"/>
+        <omgdi:waypoint x="1130" y="1690"/>
+        <omgdi:waypoint x="1130" y="1850"/>
+      </bpmndi:BPMNEdge>
+      <!-- 需求验收网关 默认 → 需求验收 [左侧通道 x=110] -->
+      <bpmndi:BPMNEdge id="edge_Flow_gw_acceptance_default" bpmnElement="Flow_gw_acceptance_default">
+        <omgdi:waypoint x="310" y="1675"/>
+        <omgdi:waypoint x="110" y="1675"/>
+        <omgdi:waypoint x="110" y="1490"/>
+        <omgdi:waypoint x="180" y="1490"/>
+      </bpmndi:BPMNEdge>
+      <!-- 已完成 → 结束 -->
+      <!-- 已关闭 → 结束 -->
+      <!-- 已完成 → 结束 -->
+      <bpmndi:BPMNEdge id="edge-c2395836-e015-4101-8cec-e02a66173539" bpmnElement="sid-8ac38421-46f2-4f57-a342-67df9f812bfe">
+        <omgdi:waypoint x="1180" y="1890"/>
+        <omgdi:waypoint x="1270" y="1890"/>
+      </bpmndi:BPMNEdge>
+      <!-- 已关闭 → 结束 -->
+      <bpmndi:BPMNEdge id="edge_sid-7a10a013" bpmnElement="sid-7a10a013">
+        <omgdi:waypoint x="1180" y="1090"/>
+        <omgdi:waypoint x="1270" y="1090"/>
+        <omgdi:waypoint x="1270" y="1890"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

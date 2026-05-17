@@ -29,11 +29,7 @@ public class RequirementController {
     @Resource
     private RequirementLogService requirementLogService;
 
-    @PostMapping("/add")
-    @ApiOperation("新增需求（自动启动流程）")
-    public Result<RequirementVO> add(@RequestBody RequirementAddDTO dto) {
-        return Result.success(requirementService.add(dto));
-    }
+    // ========== 通用 CRUD（不区分流程） ==========
 
     @PostMapping("/query")
     @ApiOperation("分页查询需求")
@@ -67,11 +63,21 @@ public class RequirementController {
         return Result.success(requirementLogService.listByRequirementNo(requirementNo));
     }
 
-    // ========== 流程操作 ==========
+    // ========== 流程操作（按 processKey 区分） ==========
 
-    @PostMapping("/flow/send")
+    @PostMapping("/{processKey}/add")
+    @ApiOperation("新增需求（指定流程: requirement_pool / FL25103101）")
+    public Result<RequirementVO> add(@PathVariable String processKey, @RequestBody RequirementAddDTO dto) {
+        try {
+            return Result.success(requirementService.add(processKey, dto));
+        } catch (Exception e) {
+            return Result.fail(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{processKey}/flow/send")
     @ApiOperation("触发需求流程事件")
-    public Result<String> sendFlowEvent(@RequestBody FlowEventDTO dto) {
+    public Result<String> sendFlowEvent(@PathVariable String processKey, @RequestBody FlowEventDTO dto) {
         try {
             requirementService.sendFlowEvent(dto.getRequirementNo(), dto.getEvent());
             return Result.success("流程事件 " + dto.getEvent() + " 已触发");
@@ -80,9 +86,9 @@ public class RequirementController {
         }
     }
 
-    @GetMapping("/flow/state")
+    @GetMapping("/{processKey}/flow/state")
     @ApiOperation("查询需求流程状态")
-    public Result<Map<String, Object>> getFlowState(@RequestParam String requirementNo) {
+    public Result<Map<String, Object>> getFlowState(@PathVariable String processKey, @RequestParam String requirementNo) {
         try {
             return Result.success(requirementService.getFlowState(requirementNo));
         } catch (Exception e) {

@@ -48,4 +48,7 @@ public class Requirement extends BaseEntity {
 
     @ApiModelProperty("当前节点")
     private String currentNode;
+
+    @ApiModelProperty("流程定义Key（requirement_pool / FL25103101）")
+    private String processKey;
 }

@@ -18,7 +18,8 @@ public class WithStateMachineSupport {
         return listeners.stream()
                 .filter(listener -> {
                     WithStateMachine annotation = listener.getClass().getAnnotation(WithStateMachine.class);
-                    return annotation != null && annotation.domain().equals(domain);
+                    // 没有注解 → 监听所有领域；有注解且匹配 → 监听该领域
+                    return annotation == null || annotation.domain().equals(domain);
                 })
                 .collect(Collectors.toList());
     }

@@ -8,10 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * 需求状态变更日志监听器（领域: requirement_pool）
+ * 需求状态变更日志监听器（监听所有领域）
  */
 @Component
-@WithStateMachine(domain = "requirement_pool")
 public class RequirementStateLogListener implements StateMachineListener {
 
     @Autowired

@@ -14,7 +14,7 @@ public interface RequirementService extends IService<Requirement> {
 
     PageResult<RequirementVO> query(RequirementQueryDTO dto);
 
-    RequirementVO add(RequirementAddDTO dto);
+    RequirementVO add(String processKey, RequirementAddDTO dto);
 
     void update(RequirementUpdateDTO dto);
 

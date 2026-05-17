@@ -9,6 +9,7 @@ import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
 import org.flowable.engine.repository.ProcessDefinition;
+import org.flowable.engine.runtime.Execution;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.Task;
 
@@ -57,17 +58,31 @@ public class FlowableStateMachine implements StateMachine {
             throw new IllegalStateException("流程实例不存在: " + businessKey);
         }
 
-        // 获取当前任务，携带 action 变量完成任务，推动流程流转
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("event", event);
+
+        // 先尝试 userTask（兼容旧流程）
         List<Task> tasks = taskService.createTaskQuery()
                 .processInstanceId(pi.getId())
                 .list();
-        if (tasks.isEmpty()) {
-            throw new IllegalStateException("当前无待办任务，流程可能已结束");
+        if (!tasks.isEmpty()) {
+            taskService.complete(tasks.get(0).getId(), variables);
+            State toState = getState();
+            notifyListeners(fromState, toState, event);
+            return;
         }
 
-        Map<String, Object> variables = new HashMap<>();
-        variables.put("action", event);
-        taskService.complete(tasks.get(0).getId(), variables);
+        // 再尝试 receiveTask：查找当前等待的子执行
+        List<Execution> executions = runtimeService.createExecutionQuery()
+                .processInstanceId(pi.getId())
+                .onlyChildExecutions()
+                .list();
+        if (executions.isEmpty()) {
+            throw new IllegalStateException("当前无待办任务（userTask/receiveTask），流程可能已结束");
+        }
+
+        // 触发第一个等待的 receiveTask
+        runtimeService.trigger(executions.get(0).getId(), variables);
 
         State toState = getState();
         notifyListeners(fromState, toState, event);
@@ -105,15 +120,49 @@ public class FlowableStateMachine implements StateMachine {
         if (pi == null) {
             return null;
         }
+
+        // 先查 userTask
         List<Task> tasks = taskService.createTaskQuery()
                 .processInstanceId(pi.getId())
                 .list();
-        if (tasks.isEmpty()) {
-            // 流程可能已结束，返回结束状态
-            return new FlowableState("end", "结束");
+        if (!tasks.isEmpty()) {
+            Task task = tasks.get(0);
+            return new FlowableState(task.getTaskDefinitionKey(), task.getName());
         }
-        Task task = tasks.get(0);
-        return new FlowableState(task.getTaskDefinitionKey(), task.getName());
+
+        // 再查 receiveTask：查找等待中的子执行
+        List<Execution> executions = runtimeService.createExecutionQuery()
+                .processInstanceId(pi.getId())
+                .onlyChildExecutions()
+                .list();
+        if (!executions.isEmpty()) {
+            Execution exec = executions.get(0);
+            String activityId = exec.getActivityId();
+            // 从 BPMN 模型中获取节点名称
+            String name = getNodeName(pi, activityId);
+            return new FlowableState(activityId, name);
+        }
+
+        // 流程可能已结束
+        return new FlowableState("end", "结束");
+    }
+
+    /**
+     * 从 BPMN 模型中获取指定节点的名称
+     */
+    private String getNodeName(ProcessInstance pi, String activityId) {
+        try {
+            ProcessDefinition pd = repositoryService.createProcessDefinitionQuery()
+                    .processDefinitionId(pi.getProcessDefinitionId())
+                    .singleResult();
+            BpmnModel bpmnModel = repositoryService.getBpmnModel(pd.getId());
+            FlowElement element = bpmnModel.getFlowElement(activityId);
+            if (element != null && element.getName() != null) {
+                return element.getName();
+            }
+        } catch (Exception ignored) {
+        }
+        return activityId;
     }
 
     @Override

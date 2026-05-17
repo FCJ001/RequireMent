@@ -13,6 +13,6 @@ public class FlowEventDTO {
     private String requirementNo;
 
     @NotBlank(message = "事件不能为空")
-    @ApiModelProperty("事件: submit/approve/reject/review_pass/review_reject/accept")
+    @ApiModelProperty("事件: CRequirementAdd:STAGE/SUBMIT, CRequirementEdit:SUBMIT, CIRCAssessment:SUBMIT/REJECT/TRANSMIT/NOTINVOLVED, CIRCcr:SUBMIT/REJECT/NO-JIRA-SUBMIT, CIRCAcceptance:ACCEPT")
     private String event;
 }

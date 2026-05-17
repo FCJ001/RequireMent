@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS biz.requirement (
     handler_id VARCHAR(50),
     flow_instance_id VARCHAR(100),
     current_node VARCHAR(100),
+    process_key VARCHAR(100),
     created_by VARCHAR(50),
     created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_by VARCHAR(50),
@@ -34,6 +35,7 @@ COMMENT ON COLUMN requirement.data IS '业务数据';
 COMMENT ON COLUMN requirement.handler_id IS '处理人ID';
 COMMENT ON COLUMN requirement.flow_instance_id IS '流程实例ID';
 COMMENT ON COLUMN requirement.current_node IS '当前节点';
+COMMENT ON COLUMN requirement.process_key IS '流程定义Key（requirement_pool / FL25103101）';
 CREATE INDEX IF NOT EXISTS idx_requirement_no ON biz.requirement(requirement_no);
 CREATE INDEX IF NOT EXISTS idx_requirement_status ON biz.requirement(status);
 

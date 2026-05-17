@@ -56,21 +56,42 @@ public class RequirementServiceImpl extends ServiceImpl<RequirementMapper, Requi
     }
 
     @Override
-    public RequirementVO add(RequirementAddDTO dto) {
+    public RequirementVO add(String processKey, RequirementAddDTO dto) {
         Requirement requirement = BeanUtil.copyProperties(dto, Requirement.class);
+
+        requirement.setProcessKey(processKey);
         requirement.setStatus("草稿");
         this.save(requirement);
 
-        // 启动需求流程（领域 = requirement_pool，业务ID = 需求单号）
+        // 启动需求流程
         try {
-            StateMachine machine = stateMachineFactory.create("requirement_pool", dto.getRequirementNo());
+            StateMachine machine = stateMachineFactory.create(processKey, dto.getRequirementNo());
             requirement.setFlowInstanceId(machine.getId());
             requirement.setCurrentNode("draft");
             this.updateById(requirement);
 
-            // 记录流程启动日志
-            requirementLogService.log(dto.getRequirementNo(), "流程启动",
-                    "需求创建并启动流程", "system", "系统");
+            // FL25103101 流程：触发新增节点，根据action决定去草稿还是需求评估
+            if ("FL25103101".equals(processKey)) {
+                String action = dto.getAction() != null ? dto.getAction() : "CRequirementAdd:STAGE";
+                requirement.setCurrentNode("node_0");
+                this.updateById(requirement);
+
+                machine.sendEvent(action);
+                State currentState = machine.getState();
+                requirement.setCurrentNode(currentState.getId());
+                this.updateById(requirement);
+
+                log.info("Requirement created: reqNo={}, processKey={}, action={}, currentNode={}",
+                        dto.getRequirementNo(), processKey, action, currentState.getId());
+                requirementLogService.log(dto.getRequirementNo(), "流程启动",
+                        "需求创建并启动流程(" + processKey + "), action=" + action, "system", "系统");
+            } else {
+                // requirement_pool 简版流程：直接停在 draft 节点，等用户发事件
+                log.info("Requirement created: reqNo={}, processKey={}, currentNode=draft",
+                        dto.getRequirementNo(), processKey);
+                requirementLogService.log(dto.getRequirementNo(), "流程启动",
+                        "需求创建并启动流程(" + processKey + "), 当前节点=draft", "system", "系统");
+            }
         } catch (Exception e) {
             // 流程启动失败，删除已保存的需求记录，保证数据一致性
             this.removeById(requirement.getId());
@@ -111,11 +132,26 @@ public class RequirementServiceImpl extends ServiceImpl<RequirementMapper, Requi
         if (requirement == null) {
             throw new RuntimeException("需求不存在: " + requirementNo);
         }
-        log.info("requirement found: id={}, status={}, currentNode={}, flowInstanceId={}",
-                requirement.getId(), requirement.getStatus(), requirement.getCurrentNode(), requirement.getFlowInstanceId());
+        String processKey = requirement.getProcessKey() != null ? requirement.getProcessKey() : "FL25103101";
+        log.info("requirement found: id={}, status={}, currentNode={}, flowInstanceId={}, processKey={}",
+                requirement.getId(), requirement.getStatus(), requirement.getCurrentNode(),
+                requirement.getFlowInstanceId(), processKey);
 
-        // 映射事件到状态
+        // 事件→状态 映射（兼容两套流程）
         Map<String, String> eventStatusMap = new HashMap<>();
+        // FL25103101 公司流程事件
+        eventStatusMap.put("CRequirementAdd:STAGE", "草稿");
+        eventStatusMap.put("CRequirementAdd:SUBMIT", "需求评估");
+        eventStatusMap.put("CRequirementEdit:SUBMIT", "需求评估");
+        eventStatusMap.put("CIRCAssessment:SUBMIT", "CR拆解");
+        eventStatusMap.put("CIRCAssessment:REJECT", "草稿");
+        eventStatusMap.put("CIRCAssessment:TRANSMIT", "需求评估");
+        eventStatusMap.put("CIRCAssessment:NOTINVOLVED", "已关闭");
+        eventStatusMap.put("CIRCcr:SUBMIT", "需求验收");
+        eventStatusMap.put("CIRCcr:REJECT", "需求评估");
+        eventStatusMap.put("CIRCcr:NO-JIRA-SUBMIT", "已完成");
+        eventStatusMap.put("CIRCAcceptance:ACCEPT", "已完成");
+        // requirement_pool 简版流程事件
         eventStatusMap.put("submit", "待审批");
         eventStatusMap.put("approve", "评审中");
         eventStatusMap.put("reject", "草稿");
@@ -127,11 +163,10 @@ public class RequirementServiceImpl extends ServiceImpl<RequirementMapper, Requi
             log.info("Looking up Flowable process for businessId={}", requirementNo);
             StateMachine machine = stateMachineFactory.get(requirementNo);
             if (machine == null) {
-                log.warn("Flowable process not found for {}, trying to create one", requirementNo);
-                // 流程不存在，尝试重新创建（兼容旧数据）
-                machine = stateMachineFactory.create("requirement_pool", requirementNo);
+                log.warn("Flowable process not found for {}, trying to create one with processKey={}",
+                        requirementNo, processKey);
+                machine = stateMachineFactory.create(processKey, requirementNo);
                 requirement.setFlowInstanceId(machine.getId());
-                requirement.setCurrentNode("draft");
                 this.updateById(requirement);
                 log.info("Flowable process created: machineId={}", machine.getId());
             }
