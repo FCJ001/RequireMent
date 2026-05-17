@@ -8,3 +8,7 @@ minio:
   access-key: admin
   secret-key: admin123456
   bucket-name: requirement
+
+flowable:
+  database-schema: wf
+  database-schema-update: true

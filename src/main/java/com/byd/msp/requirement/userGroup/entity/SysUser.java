@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("sys_user")
+@TableName("sys.sys_user")
 @ApiModel("系统用户")
 public class SysUser extends BaseEntity {
 

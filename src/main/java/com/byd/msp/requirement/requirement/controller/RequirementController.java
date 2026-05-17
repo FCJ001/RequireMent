@@ -2,6 +2,7 @@ package com.byd.msp.requirement.requirement.controller;
 
 import com.byd.msp.requirement.common.model.PageResult;
 import com.byd.msp.requirement.common.result.Result;
+import com.byd.msp.requirement.requirement.dto.FlowEventDTO;
 import com.byd.msp.requirement.requirement.dto.RequirementAddDTO;
 import com.byd.msp.requirement.requirement.dto.RequirementQueryDTO;
 import com.byd.msp.requirement.requirement.dto.RequirementUpdateDTO;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/requirement")
@@ -28,10 +30,9 @@ public class RequirementController {
     private RequirementLogService requirementLogService;
 
     @PostMapping("/add")
-    @ApiOperation("新增需求")
-    public Result<Void> add(@RequestBody RequirementAddDTO dto) {
-        requirementService.add(dto);
-        return Result.success();
+    @ApiOperation("新增需求（自动启动流程）")
+    public Result<RequirementVO> add(@RequestBody RequirementAddDTO dto) {
+        return Result.success(requirementService.add(dto));
     }
 
     @PostMapping("/query")
@@ -60,9 +61,32 @@ public class RequirementController {
         return Result.success(requirementService.detail(id));
     }
 
-    @GetMapping("/{requirementNo}/logs")
+    @GetMapping("/logs")
     @ApiOperation("需求日志列表")
-    public Result<List<RequirementLog>> logs(@PathVariable String requirementNo) {
+    public Result<List<RequirementLog>> logs(@RequestParam String requirementNo) {
         return Result.success(requirementLogService.listByRequirementNo(requirementNo));
+    }
+
+    // ========== 流程操作 ==========
+
+    @PostMapping("/flow/send")
+    @ApiOperation("触发需求流程事件")
+    public Result<String> sendFlowEvent(@RequestBody FlowEventDTO dto) {
+        try {
+            requirementService.sendFlowEvent(dto.getRequirementNo(), dto.getEvent());
+            return Result.success("流程事件 " + dto.getEvent() + " 已触发");
+        } catch (Exception e) {
+            return Result.fail(e.getMessage());
+        }
+    }
+
+    @GetMapping("/flow/state")
+    @ApiOperation("查询需求流程状态")
+    public Result<Map<String, Object>> getFlowState(@RequestParam String requirementNo) {
+        try {
+            return Result.success(requirementService.getFlowState(requirementNo));
+        } catch (Exception e) {
+            return Result.fail(e.getMessage());
+        }
     }
 }

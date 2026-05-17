@@ -1,0 +1,58 @@
+### Postman 测试集合 —— 需求流程
+### 变量: base_url = http://localhost:8080
+
+
+### 1. 新增需求（自动启动流程）
+POST {{base_url}}/requirement/add
+Content-Type: application/json
+
+{
+    "requirementNo": "REQ001",
+    "requirementType": "IDC",
+    "requirementName": "测试需求-座舱升级",
+    "priority": "高",
+    "description": "这是一个测试需求"
+}
+
+
+### 2. 查询流程状态
+GET {{base_url}}/requirement/flow/state?requirementNo=REQ001
+
+
+### 3. 提交审批（草稿 → 待审批）
+POST {{base_url}}/requirement/flow/send
+Content-Type: application/json
+
+{"requirementNo":"REQ001","event":"submit"}
+
+
+### 4. 审批通过（待审批 → 评审中）
+POST {{base_url}}/requirement/flow/send
+Content-Type: application/json
+
+{"requirementNo":"REQ001","event":"approve"}
+
+
+### 5. 评审通过（评审中 → 验收中）
+POST {{base_url}}/requirement/flow/send
+Content-Type: application/json
+
+{"requirementNo":"REQ001","event":"review_pass"}
+
+
+### 6. 验收通过（验收中 → 已完成）
+POST {{base_url}}/requirement/flow/send
+Content-Type: application/json
+
+{"requirementNo":"REQ001","event":"accept"}
+
+
+### 7. 驳回测试（回到草稿）
+POST {{base_url}}/requirement/flow/send
+Content-Type: application/json
+
+{"requirementNo":"REQ001","event":"reject"}
+
+
+### 8. 查看流程日志
+GET {{base_url}}/requirement/logs?requirementNo=REQ001

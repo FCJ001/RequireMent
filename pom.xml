@@ -90,7 +90,7 @@
         <!-- Flowable -->
         <dependency>
             <groupId>org.flowable</groupId>
-            <artifactId>flowable-spring-boot-starter-app</artifactId>
+            <artifactId>flowable-spring-boot-starter</artifactId>
             <version>${flowable.version}</version>
         </dependency>
 

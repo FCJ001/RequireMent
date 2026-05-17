@@ -10,7 +10,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("flow_instance")
+@TableName("biz.flow_instance")
 @ApiModel("流程实例")
 public class FlowInstance {
 

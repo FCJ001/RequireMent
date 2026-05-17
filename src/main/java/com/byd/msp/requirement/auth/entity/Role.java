@@ -10,7 +10,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("role")
+@TableName("sys.role")
 @ApiModel("角色")
 public class Role {
 

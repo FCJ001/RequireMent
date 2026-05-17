@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("requirement")
+@TableName("biz.requirement")
 @ApiModel("需求")
 public class Requirement extends BaseEntity {
 

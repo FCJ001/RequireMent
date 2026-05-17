@@ -10,7 +10,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("requirement_log")
+@TableName("biz.requirement_log")
 @ApiModel("需求日志")
 public class RequirementLog {
 
